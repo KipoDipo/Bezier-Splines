@@ -16,6 +16,9 @@ namespace CurvyCurves
         private bool isConnected;
         public bool IsConnected { get => isConnected; }
 
+        private bool isInterracting;
+        public bool IsInterracting { get => isInterracting; }
+
         public List<CubicBezierAdvanced> Curves { set => curves = value; get => curves; }
 
         public delegate void CubicBezierMouseEventHandler(CubicBezierAdvanced sender, Vector2f position);
@@ -137,6 +140,15 @@ namespace CurvyCurves
         public void Update()
         {
             OnUpdate?.Invoke(this);
+            isInterracting = false;
+            foreach (var c in Curves)
+            {
+                if (c.HasGrabbed)
+                {
+                    isInterracting = true;
+                    break;
+                }
+            }
         }
 
         public void Draw(RenderTarget target, RenderStates states)
