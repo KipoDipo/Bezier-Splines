@@ -6,20 +6,18 @@ namespace CurvyCurves
 {
     public class Program
     {
-        const int WIDTH = 1280, HEIGHT = 720;
-        static RenderWindow window = new RenderWindow(new VideoMode(WIDTH, HEIGHT), "Bézier Curves");
+        static RenderWindow window = new RenderWindow(new VideoMode(1280, 720), "Bézier Curves");
 
         static void Main(string[] args)
         {
             window.SetVerticalSyncEnabled(true);
-            window.Closed += Window_Closed;
+            window.Closed += (object? sender, EventArgs e) => window.Close();
 
             CurveTool tool = new CurveTool(window, 0.01f, new Color(255, 0, 0));
 
             while (window.IsOpen)
             {
                 tool.Update();
-
                 window.Clear();
 
                 window.Draw(tool);
@@ -27,12 +25,6 @@ namespace CurvyCurves
                 window.DispatchEvents();
                 window.Display();
             }
-
-        }
-
-        private static void Window_Closed(object? sender, EventArgs e)
-        {
-            window.Close();
         }
     }
 }

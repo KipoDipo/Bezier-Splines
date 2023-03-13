@@ -14,29 +14,24 @@ namespace CurvyCurves
         private Color color;
         private float stepSize;
 
+        Sprite cursor;
+
+        static readonly Texture CURSOR_DEFAULT = new Texture(Resources.cursor_default);
+        static readonly Texture CURSOR_ADD = new Texture(Resources.cursor_add);
+        static readonly Texture CURSOR_KEEP = new Texture(Resources.cursor_keep);
+
         public CurveTool(RenderWindow window, float stepSize = 0.01f, Color color = default)
         {
-
+            cursor = new Sprite(CURSOR_DEFAULT);
+            this.splines = new List<BezierSpline>();
             this.window = window;
+            this.isInterracting = false;
             this.color = new Color(color);
             this.stepSize = stepSize;
 
-            isInterracting = false;
-
-            splines = new List<BezierSpline>();
-
             window.MouseButtonReleased += Window_MouseButtonReleased;
             window.KeyReleased += Window_KeyReleased;
-            //splines.Add(new BezierSpline(color: color));
-            //splines[^1].Add(new Vector2f(200, 200));
-            //splines[^1].Add(new Vector2f(400, 400));
-            //splines[^1].Add(new Vector2f(600, 600));
-            //splines[^1].OnGrabbedBase1 += Spline_OnGrabbedBase1;
-            //splines[^1].OnGrabbedBase2 += Spline_OnGrabbedBase2;
-            //splines[^1].OnGrabbedCtrl1 += Spline_OnGrabbedCtrl1;
-            //splines[^1].OnGrabbedCtrl2 += Spline_OnGrabbedCtrl2;
-            //splines[^1].OnUpdate += Spline_OnUpdate;
-
+            window.SetMouseCursorVisible(false);
 
             Add(stepSize, color);
         }
@@ -50,7 +45,6 @@ namespace CurvyCurves
             splines[^1].OnGrabbedCtrl1 += Spline_OnGrabbedCtrl1;
             splines[^1].OnGrabbedCtrl2 += Spline_OnGrabbedCtrl2;
             splines[^1].OnUpdate += Spline_OnUpdate;
-
         }
 
         private void Window_KeyReleased(object? sender, KeyEventArgs e)
@@ -70,7 +64,7 @@ namespace CurvyCurves
 
         private void Window_MouseButtonReleased(object? sender, MouseButtonEventArgs e)
         {
-            if (e.Button == Mouse.Button.Right)
+            if (e.Button == Mouse.Button.Left && Keyboard.IsKeyPressed(Keyboard.Key.LShift))
             {
                 if (splines[^1].Curves.Count > 0 && splines[^1].Curves[0].IsHoveringBase1(new Vector2f(e.X, e.Y)))
                     splines[^1].Connect();
@@ -82,6 +76,7 @@ namespace CurvyCurves
         private int updateIndex = -1;
         public void Update()
         {
+            Texture updateCursorTexture;
             if (!isInterracting)
             {
                 for (int i = 0; i < splines.Count; i++)
@@ -101,6 +96,19 @@ namespace CurvyCurves
                 if (!splines[updateIndex].IsInterracting)
                     isInterracting = false;
             }
+
+            if (Keyboard.IsKeyPressed(Keyboard.Key.LControl))
+                updateCursorTexture = CURSOR_KEEP;
+            else if (Keyboard.IsKeyPressed(Keyboard.Key.LShift))
+                updateCursorTexture = CURSOR_ADD;
+            else
+                updateCursorTexture = CURSOR_DEFAULT;
+
+            if (updateCursorTexture != cursor.Texture)
+            {
+                cursor.Texture = updateCursorTexture;
+            }
+            cursor.Position = window.MapPixelToCoords(Mouse.GetPosition(window));
         }
 
         private void Spline_OnUpdate(BezierSpline sender)
@@ -118,7 +126,7 @@ namespace CurvyCurves
                 }
                 if (canGrab)
                 {
-                    sender.Curves[i].Update((Vector2f)Mouse.GetPosition(window), Mouse.IsButtonPressed(Mouse.Button.Left));
+                    sender.Curves[i].DispatchEvents((Vector2f)Mouse.GetPosition(window), Mouse.IsButtonPressed(Mouse.Button.Left));
                     if (sender.IsConnected)
                     {
                         if (i == 0)
@@ -156,25 +164,30 @@ namespace CurvyCurves
         }
         private void Spline_OnGrabbedCtrl2(CubicBezierAdvanced sender, Vector2f position)
         {
-            sender.SetLine2(position, sender.Line2.End);
+            if (!Keyboard.IsKeyPressed(Keyboard.Key.LShift))
+                sender.SetLine2(position, sender.Line2.End);
         }
         private void Spline_OnGrabbedCtrl1(CubicBezierAdvanced sender, Vector2f position)
         {
-            sender.SetLine1(sender.Line1.Start, position);
+            if (!Keyboard.IsKeyPressed(Keyboard.Key.LShift))
+                sender.SetLine1(sender.Line1.Start, position);
         }
         private void Spline_OnGrabbedBase2(CubicBezierAdvanced sender, Vector2f position)
         {
-            sender.SetBase2MoveCtrl2(position);
+            if (!Keyboard.IsKeyPressed(Keyboard.Key.LShift))
+                sender.SetBase2MoveCtrl2(position);
         }
         private void Spline_OnGrabbedBase1(CubicBezierAdvanced sender, Vector2f position)
         {
-            sender.SetBase1MoveCtrl1(position);
+            if (!Keyboard.IsKeyPressed(Keyboard.Key.LShift))
+                sender.SetBase1MoveCtrl1(position);
         }
 
         public void Draw(RenderTarget target, RenderStates states)
         {
             foreach (var s in splines)
                 target.Draw(s, states);
+            target.Draw(cursor);
         }
     }
 }

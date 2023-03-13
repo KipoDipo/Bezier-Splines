@@ -17,7 +17,13 @@ namespace CurvyCurves
         public bool IsConnected { get => isConnected; }
 
         private bool isInterracting;
+        private bool hasGrabbedBase;
+        private bool hasGrabbedCtrl;
+
         public bool IsInterracting { get => isInterracting; }
+        public bool HasGrabbedBase { get => hasGrabbedBase; }
+        public bool HasGrabbedCtrl { get => hasGrabbedCtrl; }
+
 
         public List<CubicBezierAdvanced> Curves { set => curves = value; get => curves; }
 
@@ -140,11 +146,15 @@ namespace CurvyCurves
         public void Update()
         {
             OnUpdate?.Invoke(this);
-            isInterracting = false;
+            isInterracting = hasGrabbedCtrl = hasGrabbedBase = false;
             foreach (var c in Curves)
             {
                 if (c.HasGrabbed)
                 {
+                    if (c.HasGrabbedBase)
+                        hasGrabbedBase = true;
+                    else if (c.HasGrabbedControl)
+                        hasGrabbedCtrl = true;
                     isInterracting = true;
                     break;
                 }

@@ -181,7 +181,7 @@ namespace CurvyCurves
             bezier.Update(l1, l2);
         }
 
-        public void Update(Vector2f position, bool isInterracting)
+        public void DispatchEvents(Vector2f position, bool isInterracting)
         {
             bool isHoveringCtrl1 = IsHoveringControl1(position);
             bool isHoveringCtrl2 = IsHoveringControl2(position);
