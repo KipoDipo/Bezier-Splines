@@ -18,10 +18,9 @@ namespace CurvyCurves
             while (window.IsOpen)
             {
                 tool.Update();
+
                 window.Clear();
-
                 window.Draw(tool);
-
                 window.DispatchEvents();
                 window.Display();
             }
