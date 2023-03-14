@@ -45,6 +45,12 @@ namespace CurvyCurves
             Update((start.X, start.Y), (end.X, end.Y));
         }
 
+        public void ChangeColor(Color color)
+        {
+            line[0].Color = new Color(color);
+            line[1].Color = new Color(color);
+        }
+
         public void Update((float x, float y) start, (float x, float y) end)
         {
             Start = new Vector2f(start.x, start.y);

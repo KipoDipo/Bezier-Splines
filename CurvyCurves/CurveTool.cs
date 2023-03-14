@@ -11,14 +11,18 @@ namespace CurvyCurves
 
         private bool isInterracting;
 
-        private Color color;
         private float stepSize;
 
-        Sprite cursor;
+        private Sprite cursor;
 
         static readonly Texture CURSOR_DEFAULT = new Texture(Resources.cursor_default);
         static readonly Texture CURSOR_ADD = new Texture(Resources.cursor_add);
         static readonly Texture CURSOR_KEEP = new Texture(Resources.cursor_keep);
+
+        private static Color inactiveColor = new Color(150, 150, 150);
+        private Color activeColor;
+
+        private int activeIndex = 0;
 
         public CurveTool(RenderWindow window, float stepSize = 0.01f, Color color = default)
         {
@@ -26,7 +30,9 @@ namespace CurvyCurves
             this.splines = new List<BezierSpline>();
             this.window = window;
             this.isInterracting = false;
-            this.color = new Color(color);
+
+            this.activeColor = new Color(color);
+
             this.stepSize = stepSize;
 
             window.MouseButtonReleased += Window_MouseButtonReleased;
@@ -51,14 +57,21 @@ namespace CurvyCurves
         {
             if (e.Code == Keyboard.Key.Delete)
             {
-                if (splines.Count > 1 && splines[^1].Curves.Count == 0)
+                if (splines.Count > 1 && splines[activeIndex].Curves.Count <= 1)
+                {
                     splines.RemoveAt(splines.Count - 1);
-                splines[^1].Pop();
+                    splines[^1].Color = activeColor;
+                    activeIndex -= activeIndex == 0 ? 0 : 1;
+                    return;
+                }
+                splines[activeIndex].Pop();
                 return;
             }
-            if (e.Code == Keyboard.Key.Enter)
+            if (e.Code == Keyboard.Key.Enter && splines[activeIndex].Curves.Count > 0)
             {
-                Add(stepSize, color);
+                splines[activeIndex].Color = inactiveColor;
+                activeIndex = splines.Count;
+                Add(stepSize, activeColor);
             }
         }
 
@@ -66,35 +79,61 @@ namespace CurvyCurves
         {
             if (e.Button == Mouse.Button.Left && Keyboard.IsKeyPressed(Keyboard.Key.LShift))
             {
-                if (splines[^1].Curves.Count > 0 && splines[^1].Curves[0].IsHoveringBase1(new Vector2f(e.X, e.Y)))
-                    splines[^1].Connect();
+                if (splines[activeIndex].Curves.Count > 0 && splines[activeIndex].Curves[0].IsHoveringBase1(new Vector2f(e.X, e.Y)))
+                {
+                    splines[activeIndex].Connect();
+                    splines[activeIndex].Curves[^1].SetLine2(splines[activeIndex].Curves[^1].Line2.End + (splines[activeIndex].Curves[^1].Line2.End - splines[activeIndex].Curves[0].Line1.End), splines[activeIndex].Curves[^1].Line2.End);
+                }
                 else
-                    splines[^1].Add((Vector2f)Mouse.GetPosition(window));
+                {
+                    splines[activeIndex].Add((Vector2f)Mouse.GetPosition(window));
+                }
             }
         }
 
-        private int updateIndex = -1;
         public void Update()
         {
             Texture updateCursorTexture;
+            int lastActiveIndex = activeIndex;
+
             if (!isInterracting)
             {
-                for (int i = 0; i < splines.Count; i++)
+                splines[activeIndex].Update();
+                if (splines[activeIndex].IsInterracting)
                 {
-                    splines[i].Update();
-                    if (splines[i].IsInterracting)
+                    isInterracting = true;
+                }
+                else
+                {
+                    for (int i = 0; i < splines.Count; i++)
                     {
-                        updateIndex = i;
-                        isInterracting = true;
-                        break;
+                        splines[i].Update();
+                        if (i != activeIndex && splines[i].IsInterracting)
+                        {
+                            activeIndex = i;
+                            isInterracting = true;
+                            break;
+                        }
                     }
                 }
             }
             else
             {
-                splines[updateIndex].Update();
-                if (!splines[updateIndex].IsInterracting)
+                splines[activeIndex].Update();
+                if (!splines[activeIndex].IsInterracting)
                     isInterracting = false;
+            }
+
+            if (lastActiveIndex != activeIndex)
+            {
+                splines.RemoveAll(x => x.Curves.Count == 0);
+                for (int i = 0; i < splines.Count; i++)
+                {
+                    if (i == activeIndex)
+                        splines[i].Color = activeColor;
+                    else
+                        splines[i].Color = inactiveColor;
+                }
             }
 
             if (Keyboard.IsKeyPressed(Keyboard.Key.LControl))

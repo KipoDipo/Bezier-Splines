@@ -10,6 +10,18 @@ namespace CurvyCurves
         private Vector2f? startingPos;
 
         private Color color;
+        public Color Color
+        {
+            get => color;
+            set
+            {
+                color = value;
+                foreach (var c in curves)
+                {
+                    c.Color = value;
+                }
+            }
+        }
 
         private float stepSize;
 
@@ -23,7 +35,6 @@ namespace CurvyCurves
         public bool IsInterracting { get => isInterracting; }
         public bool HasGrabbedBase { get => hasGrabbedBase; }
         public bool HasGrabbedCtrl { get => hasGrabbedCtrl; }
-
 
         public List<CubicBezierAdvanced> Curves { set => curves = value; get => curves; }
 

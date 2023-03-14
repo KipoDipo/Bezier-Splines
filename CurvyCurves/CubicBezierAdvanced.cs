@@ -17,6 +17,18 @@ namespace CurvyCurves
         private bool hasGrabbed = false;
 
         private CubicBezier bezier;
+        private Color color;
+        public Color Color
+        {
+            get => color;
+            set
+            {
+                color = value;
+                bezier.Color = value;
+                ctrl1.FillColor = ctrl2.FillColor = base1.FillColor = base2.FillColor = new Color(value.R, value.G, value.B, 100);
+                ctrl1.OutlineColor = ctrl2.OutlineColor = base1.OutlineColor = base2.OutlineColor = new Color(value.R, value.G, value.B, 180);
+            }
+        }
 
         public bool HasGrabbed { get => hasGrabbed; }
 
@@ -46,18 +58,20 @@ namespace CurvyCurves
 
         public CubicBezierAdvanced(Line line1, Line line2, float stepSize, Color color = default)
         {
+            this.color = color;
+
             ctrl1 = new CircleShape(10)
             {
-                FillColor = new Color(255, 255, 255, 100),
-                OutlineColor = new Color(255, 255, 255, 180),
+                FillColor = new Color(color.R, color.G, color.B, 100),
+                OutlineColor = new Color(color.R, color.G, color.B, 180),
                 OutlineThickness = 1,
                 Origin = new Vector2f(10, 10)
             };
             ctrl2 = new CircleShape(ctrl1);
             base1 = new RectangleShape(new Vector2f(20, 20))
             {
-                FillColor = new Color(255, 255, 255, 100),
-                OutlineColor = new Color(255, 255, 255, 180),
+                FillColor = new Color(color.R, color.G, color.B, 100),
+                OutlineColor = new Color(color.R, color.G, color.B, 180),
                 OutlineThickness = 1,
                 Origin = new Vector2f(20, 20) / 2
             };
@@ -75,55 +89,11 @@ namespace CurvyCurves
             t3 = new Tracer(new Color(255, 255, 255, 50));
             t4 = new Tracer(new Color(255, 255, 255, 50));
             t5 = new Tracer(new Color(255, 255, 255, 50));
-            t6 = new Tracer(new Color(100, 255, 255, 100));
+            t6 = new Tracer(new Color(color.R, color.G, color.B, 100));
 
             bezier = new CubicBezier(line1, line2, stepSize, color);
         }
 
-        public void Draw(RenderTarget target, RenderStates states)
-        {
-            target.Draw(bezier, states);
-
-            if (!Keyboard.IsKeyPressed(Keyboard.Key.Escape))
-            {
-                target.Draw(l1, states);
-                target.Draw(l2, states);
-                target.Draw(ctrl1, states);
-                target.Draw(ctrl2, states);
-                target.Draw(base1, states);
-                target.Draw(base2, states);
-            }
-
-            if (Keyboard.IsKeyPressed(Keyboard.Key.Space))
-            {
-                t1.Update(l1);
-                t2.Update(l2);
-                l3.Update(l1.End, l2.Start);
-                t3.Update(l3);
-                l4.Update(t1.Position, t3.Position);
-                l5.Update(t3.Position, t2.Position);
-                t4.Update(l4);
-                t5.Update(l5);
-                l6.Update(t4.Position, t5.Position);
-                t6.Update(l6);
-                target.Draw(t1, states);
-                target.Draw(t2, states);
-                target.Draw(t3, states);
-                target.Draw(t4, states);
-                target.Draw(t5, states);
-                target.Draw(t6, states);
-                target.Draw(l3, states);
-                target.Draw(l4, states);
-                target.Draw(l5, states);
-                target.Draw(l6, states);
-                if (t1.Progress == 1)
-                    t1.Progress = t2.Progress = t3.Progress = t4.Progress = t5.Progress = t6.Progress = 0;
-            }
-            else
-            {
-                t1.Progress = t2.Progress = t3.Progress = t4.Progress = t5.Progress = t6.Progress = 0;
-            }
-        }
 
         public bool IsHoveringControl1(Vector2f position)
         {
@@ -229,5 +199,49 @@ namespace CurvyCurves
             isHoldingCtrl1 = isHoldingCtrl2 = isHoldingBase1 = isHoldingBase2 = hasGrabbed = false;
         }
 
+        public void Draw(RenderTarget target, RenderStates states)
+        {
+            target.Draw(bezier, states);
+
+            if (!Keyboard.IsKeyPressed(Keyboard.Key.Escape))
+            {
+                target.Draw(l1, states);
+                target.Draw(l2, states);
+                target.Draw(ctrl1, states);
+                target.Draw(ctrl2, states);
+                target.Draw(base1, states);
+                target.Draw(base2, states);
+            }
+
+            if (Keyboard.IsKeyPressed(Keyboard.Key.Space))
+            {
+                t1.Update(l1);
+                t2.Update(l2);
+                l3.Update(l1.End, l2.Start);
+                t3.Update(l3);
+                l4.Update(t1.Position, t3.Position);
+                l5.Update(t3.Position, t2.Position);
+                t4.Update(l4);
+                t5.Update(l5);
+                l6.Update(t4.Position, t5.Position);
+                t6.Update(l6);
+                target.Draw(t1, states);
+                target.Draw(t2, states);
+                target.Draw(t3, states);
+                target.Draw(t4, states);
+                target.Draw(t5, states);
+                target.Draw(t6, states);
+                target.Draw(l3, states);
+                target.Draw(l4, states);
+                target.Draw(l5, states);
+                target.Draw(l6, states);
+                if (t1.Progress == 1)
+                    t1.Progress = t2.Progress = t3.Progress = t4.Progress = t5.Progress = t6.Progress = 0;
+            }
+            else
+            {
+                t1.Progress = t2.Progress = t3.Progress = t4.Progress = t5.Progress = t6.Progress = 0;
+            }
+        }
     }
 }

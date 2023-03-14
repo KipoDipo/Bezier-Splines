@@ -18,6 +18,18 @@ namespace CurvyCurves
 
         public Vector2f Start { get => lines[0].Start; }
         public Vector2f End   { get => lines[^1].End; }
+        public Color Color
+        {
+            get => color;
+            set
+            {
+                color = value;
+                foreach (var l in lines)
+                {
+                    l.ChangeColor(value);
+                }
+            }
+        }
 
         public void Update(Line line1, Line line2)
         {
@@ -59,7 +71,6 @@ namespace CurvyCurves
             }
             lines.Add(new Line(lines[^1].End, line2.End, color));
         }
-
 
         public void Draw(RenderTarget target, RenderStates states)
         {
