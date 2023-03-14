@@ -52,45 +52,6 @@ namespace CurvyCurves
             splines[^1].OnGrabbedCtrl2 += Spline_OnGrabbedCtrl2;
             splines[^1].OnUpdate += Spline_OnUpdate;
         }
-
-        private void Window_KeyReleased(object? sender, KeyEventArgs e)
-        {
-            if (e.Code == Keyboard.Key.Delete)
-            {
-                if (splines.Count > 1 && splines[activeIndex].Curves.Count <= 1)
-                {
-                    splines.RemoveAt(splines.Count - 1);
-                    splines[^1].Color = activeColor;
-                    activeIndex -= activeIndex == 0 ? 0 : 1;
-                    return;
-                }
-                splines[activeIndex].Pop();
-                return;
-            }
-            if (e.Code == Keyboard.Key.Enter && splines[activeIndex].Curves.Count > 0)
-            {
-                splines[activeIndex].Color = inactiveColor;
-                activeIndex = splines.Count;
-                Add(stepSize, activeColor);
-            }
-        }
-
-        private void Window_MouseButtonReleased(object? sender, MouseButtonEventArgs e)
-        {
-            if (e.Button == Mouse.Button.Left && Keyboard.IsKeyPressed(Keyboard.Key.LShift))
-            {
-                if (splines[activeIndex].Curves.Count > 0 && splines[activeIndex].Curves[0].IsHoveringBase1(new Vector2f(e.X, e.Y)))
-                {
-                    splines[activeIndex].Connect();
-                    splines[activeIndex].Curves[^1].SetLine2(splines[activeIndex].Curves[^1].Line2.End + (splines[activeIndex].Curves[^1].Line2.End - splines[activeIndex].Curves[0].Line1.End), splines[activeIndex].Curves[^1].Line2.End);
-                }
-                else
-                {
-                    splines[activeIndex].Add((Vector2f)Mouse.GetPosition(window));
-                }
-            }
-        }
-
         public void Update()
         {
             Texture updateCursorTexture;
@@ -148,6 +109,43 @@ namespace CurvyCurves
                 cursor.Texture = updateCursorTexture;
             }
             cursor.Position = window.MapPixelToCoords(Mouse.GetPosition(window));
+        }
+
+        private void Window_KeyReleased(object? sender, KeyEventArgs e)
+        {
+            if (e.Code == Keyboard.Key.Delete)
+            {
+                if (splines.Count > 1 && splines[activeIndex].Curves.Count <= 1)
+                {
+                    splines.RemoveAt(splines.Count - 1);
+                    splines[^1].Color = activeColor;
+                    activeIndex -= activeIndex == 0 ? 0 : 1;
+                    return;
+                }
+                splines[activeIndex].Pop();
+                return;
+            }
+            if (e.Code == Keyboard.Key.Enter && splines[activeIndex].Curves.Count > 0)
+            {
+                splines[activeIndex].Color = inactiveColor;
+                activeIndex = splines.Count;
+                Add(stepSize, activeColor);
+            }
+        }
+        private void Window_MouseButtonReleased(object? sender, MouseButtonEventArgs e)
+        {
+            if (e.Button == Mouse.Button.Left && Keyboard.IsKeyPressed(Keyboard.Key.LShift))
+            {
+                if (splines[activeIndex].Curves.Count > 0 && splines[activeIndex].Curves[0].IsHoveringBase1(new Vector2f(e.X, e.Y)))
+                {
+                    splines[activeIndex].Connect();
+                    splines[activeIndex].Curves[^1].SetLine2(splines[activeIndex].Curves[^1].Line2.End + (splines[activeIndex].Curves[^1].Line2.End - splines[activeIndex].Curves[0].Line1.End), splines[activeIndex].Curves[^1].Line2.End);
+                }
+                else
+                {
+                    splines[activeIndex].Add((Vector2f)Mouse.GetPosition(window));
+                }
+            }
         }
 
         private void Spline_OnUpdate(BezierSpline sender)

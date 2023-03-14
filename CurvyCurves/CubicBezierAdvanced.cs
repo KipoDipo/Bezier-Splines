@@ -94,7 +94,6 @@ namespace CurvyCurves
             bezier = new CubicBezier(line1, line2, stepSize, color);
         }
 
-
         public bool IsHoveringControl1(Vector2f position)
         {
             return MathF.Abs(position.X - ctrl1.Position.X) <= ctrl1.Radius &&
@@ -215,16 +214,16 @@ namespace CurvyCurves
 
             if (Keyboard.IsKeyPressed(Keyboard.Key.Space))
             {
-                t1.Update(l1);
-                t2.Update(l2);
+                t1.Update(l1, bezier.StepSize);
+                t2.Update(l2, bezier.StepSize);
                 l3.Update(l1.End, l2.Start);
-                t3.Update(l3);
+                t3.Update(l3, bezier.StepSize);
                 l4.Update(t1.Position, t3.Position);
                 l5.Update(t3.Position, t2.Position);
-                t4.Update(l4);
-                t5.Update(l5);
+                t4.Update(l4, bezier.StepSize);
+                t5.Update(l5, bezier.StepSize);
                 l6.Update(t4.Position, t5.Position);
-                t6.Update(l6);
+                t6.Update(l6, bezier.StepSize);
                 target.Draw(t1, states);
                 target.Draw(t2, states);
                 target.Draw(t3, states);

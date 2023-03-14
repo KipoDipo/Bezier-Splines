@@ -24,6 +24,7 @@ namespace CurvyCurves
         }
 
         private float stepSize;
+        public float StepSize { get => stepSize; }
 
         private bool isConnected;
         public bool IsConnected { get => isConnected; }

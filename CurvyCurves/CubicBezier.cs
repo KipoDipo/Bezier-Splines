@@ -18,6 +18,8 @@ namespace CurvyCurves
 
         public Vector2f Start { get => lines[0].Start; }
         public Vector2f End   { get => lines[^1].End; }
+        public float StepSize { get => stepSize; }
+
         public Color Color
         {
             get => color;
@@ -66,8 +68,6 @@ namespace CurvyCurves
                     lines.Add(new Line(line1.Start, t6.Position, color));
                 else
                     lines.Add(new Line(lines[^1].End, t6.Position, color));
-
-                i = MathF.Round(i, 2);
             }
             lines.Add(new Line(lines[^1].End, line2.End, color));
         }
